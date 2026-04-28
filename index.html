@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en"><!-- cache: 1777037440 -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>momencio &middot; Quote Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2558E8;--blue-d:#1A44C4;--blue-bg:#EBF0FF;--blue-row:#EEF3FF;
+  --dark:#1C1B19;--body:#2C2C2A;--muted:#6B6B65;--subtle:#A0A09A;
+  --rule:#E4E4DE;--ruled:#CDCDC6;--bg:#F5F5F1;--white:#fff;
+  --green:#1A7A4A;--green-bg:#E8F7EF;
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --r:10px;--rsm:6px;--rxs:5px
+}
+body{font-family:var(--font);background:var(--bg);color:var(--body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:24px 16px 48px}
+.page{max-width:880px;margin:0 auto;background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.10)}
+.hdr{background:var(--blue);padding:18px 28px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo-img{height:58px;width:58px;object-fit:cover;border-radius:12px;display:block}
+.hdr-tag{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.5);padding:5px 14px;border-radius:20px}
+.content{padding:22px 28px}
+.cg{display:grid;grid-template-columns:1fr 1fr 1fr 148px;gap:11px;margin-bottom:18px;background:#F8F8F5;border:1px solid var(--rule);border-radius:var(--r);padding:14px 16px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.field input,.field select{font-family:var(--font);font-size:13px;color:var(--dark);background:var(--white);border:1px solid var(--ruled);border-radius:var(--rxs);padding:7px 10px;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue)}
+.req-star{color:#E8301F;font-size:12px;font-weight:800;margin-left:2px}
+.req-input.invalid{border-color:#E8301F!important;background:#FFF5F5}
+.req-err{font-size:10px;color:#E8301F;font-weight:600;margin-top:3px;display:none}
+.req-err.show{display:block}
+.bp:disabled{background:#A0A09A!important;cursor:not-allowed;opacity:.7}
+.bp-wrap{position:relative;flex:1}
+.bp-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font-size:11px;font-weight:500;padding:6px 12px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10}
+.bp-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--dark)}
+.bp-wrap:hover .bp-tooltip{opacity:1}
+.sl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--subtle);margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.sl::after{content:'';flex:1;height:1px;background:var(--rule)}
+/* PLANS */
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.plan{border:1.5px solid var(--rule);border-radius:var(--r);padding:15px 16px;cursor:pointer;transition:all .15s;background:var(--white)}
+.plan:hover{border-color:#93B4FF}
+.plan.sel{border-color:var(--blue);background:var(--blue-row)}
+.pb{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:7px}
+.pb-gr{background:#EBEBEA;color:var(--muted)}.pb-bl{background:#DBEAFE;color:#1A4FBF}.pb-gn{background:#D1FAE5;color:#065F46}
+.pname{font-size:16px;font-weight:800;color:var(--dark);letter-spacing:-.2px}
+.pprice{font-size:21px;font-weight:800;color:var(--blue);letter-spacing:-.5px;margin:2px 0}
+.pprice-sub{font-size:10px;color:var(--muted);margin-bottom:4px}
+.pseat-note{font-size:11px;font-weight:600;color:var(--body);background:rgba(0,0,0,.05);border-radius:4px;padding:3px 8px;display:inline-block;margin-bottom:9px}
+.plan.sel .pseat-note{background:rgba(37,99,255,.12)}
+.pfeat{border-top:1px solid var(--rule);padding-top:8px;font-size:11px;color:var(--muted);line-height:1.85}
+.plan.sel .pfeat{border-color:rgba(37,99,255,.2)}
+.pfeat li{list-style:none;padding-left:12px;position:relative}
+.pfeat li::before{content:"--";position:absolute;left:0;color:var(--blue)}
+/* SEATS + EVENTS */
+.se{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;background:#F8F8F5;border:1px solid var(--rule);border-radius:var(--r);padding:14px 16px}
+.epills{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:7px}
+.ep{border:1.5px solid var(--ruled);border-radius:var(--rxs);padding:8px 2px 6px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--body);background:var(--white);transition:all .13s;user-select:none}
+.ep:hover{border-color:#93B4FF;background:#F0F4FF}
+.ep.act{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.ep-sub{font-size:8px;font-weight:500;color:var(--subtle);margin-top:1px}
+.ep.act .ep-sub{color:var(--blue);opacity:.7}
+.field-hint{font-size:11px;color:var(--muted);margin-top:5px}
+.warn{font-size:11px;color:#B94A00;background:#FFF3EA;border:1px solid #FFD0A8;border-radius:4px;padding:4px 9px;display:none;margin-top:5px}
+.warn.on{display:block}
+.seat-btn{width:36px;height:36px;border:1.5px solid var(--ruled);border-radius:var(--rxs);background:var(--white);cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--dark);flex-shrink:0;transition:all .13s}
+.seat-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+/* ADD-ONS */
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.ao{border:1px solid var(--rule);border-radius:var(--rsm);padding:12px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:#F8F8F5;transition:all .13s}
+.ao:hover{border-color:#93B4FF;background:var(--white)}
+.ao.on{border-color:var(--blue);background:var(--blue-bg)}
+.ck{width:17px;height:17px;border:1.5px solid var(--ruled);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;background:#fff;transition:all .13s}
+.ao.on .ck{background:var(--blue);border-color:var(--blue)}
+.ainfo{flex:1}.aname{font-size:12px;font-weight:700;color:var(--dark)}.adesc{font-size:10px;color:var(--muted);margin-top:1px;line-height:1.4}
+.aright{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.aprice{font-size:13px;font-weight:800;color:var(--blue)}
+.aprice-sub{font-size:9px;color:var(--subtle)}
+.cc{display:flex;align-items:center;gap:4px}
+.cc button{width:20px;height:20px;border:1px solid var(--ruled);border-radius:3px;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--dark)}
+.cc button:hover{background:var(--rule)}
+.ccv{font-size:12px;font-weight:600;min-width:14px;text-align:center}
+/* CRM */
+.cr{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:18px}
+.cb{border:1px solid var(--ruled);border-radius:var(--rxs);padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:500;color:var(--body);background:#F8F8F5;transition:all .13s;line-height:1.3}
+.cb:hover{border-color:#93B4FF;background:var(--white)}
+.cb.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);font-weight:700}
+/* GAMIFICATION */
+.gnote{font-size:11px;color:var(--muted);margin-bottom:9px;border-left:3px solid #F5A87A;padding:5px 10px;background:#FFF8F5;border-radius:0 4px 4px 0}
+.gg{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:18px}
+.gm{border:1px solid var(--rule);border-radius:var(--rsm);padding:10px 6px 11px;text-align:center;cursor:pointer;background:#F8F8F5;transition:all .13s}
+.gm:hover{border-color:#93B4FF;background:var(--white)}
+.gm.on{border-color:var(--blue);background:var(--blue-bg)}
+.gi{font-size:20px;margin-bottom:3px}.gn{font-size:10px;font-weight:700;color:var(--dark);line-height:1.3;margin-bottom:2px}.gp{font-size:11px;font-weight:700;color:var(--blue)}.gs{font-size:9px;color:var(--subtle)}
+.gq{display:none;align-items:center;justify-content:center;gap:4px;margin-top:5px}
+.gm.on .gq{display:flex}
+.gq button{width:18px;height:18px;border:1px solid var(--ruled);border-radius:3px;background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--dark)}
+.gq button:hover{background:var(--rule)}
+.gqv{font-size:11px;font-weight:700;min-width:12px;text-align:center;color:var(--dark)}
+/* QUOTE TABLE */
+.qt{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.qth{display:grid;grid-template-columns:150px 1fr 60px 90px 90px;background:var(--dark);color:rgba(255,255,255,.55);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:9px 14px}
+.qth .tr{text-align:right}
+.qtr{display:grid;grid-template-columns:150px 1fr 60px 90px 90px;padding:12px 14px 10px;border-bottom:1px solid var(--rule);align-items:start;background:var(--white)}
+.qtr.alt{background:var(--blue-row)}
+.qtr.gap{height:5px;background:var(--bg);padding:0;border-bottom:1px solid var(--rule)}
+.qcat{font-size:13px;font-weight:800;color:var(--dark)}
+.qdesc{font-size:11px;color:var(--muted);line-height:1.6;margin-top:1px}
+.qr{text-align:right}
+.qu{font-size:13px;font-weight:700;color:var(--dark)}
+.quc{font-size:11px;color:var(--muted)}
+.quc.blu{color:var(--blue);font-weight:700}
+.qst{font-size:14px;font-weight:800;color:var(--blue)}
+.qst.dash{color:var(--ruled)}
+.qst .sup{font-size:9px;vertical-align:super;font-weight:700}
+/* SAVINGS */
+.saved{background:var(--green-bg);border:1px solid #A7F3D0;border-radius:var(--rsm);padding:8px 13px;font-size:12px;font-weight:600;color:var(--green);margin-bottom:14px;display:none;align-items:center;gap:6px}
+.saved.on{display:flex}
+/* TOTAL BAR */
+.tbar{background:var(--blue);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tl{color:#fff}.tt{font-size:16px;font-weight:800;letter-spacing:-.2px}.tn{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+.tr2{text-align:right}
+.ta{font-size:34px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1}
+.tsup{font-size:16px;vertical-align:super;font-weight:700}.tsub{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
+/* KPI ROW */
+.krow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi{background:var(--blue-bg);border:1px solid #BFCFFF;border-radius:var(--rsm);padding:12px 14px;text-align:center}
+.kv{font-size:19px;font-weight:800;color:var(--blue);letter-spacing:-.4px}.kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+/* NOTES + ACTIONS */
+textarea{font-family:var(--font);font-size:13px;width:100%;background:#F8F8F5;border:1px solid var(--ruled);border-radius:var(--rsm);padding:10px 12px;color:var(--dark);resize:vertical;min-height:58px;transition:border-color .15s;margin-bottom:13px}
+textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+.acts{display:flex;gap:8px}
+.bp{flex:1;background:var(--blue);color:#fff;border:none;border-radius:var(--rsm);padding:12px 18px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:background .13s}
+.bp:hover{background:var(--blue-d)}
+.br2{background:#fff;color:var(--body);border:1px solid var(--ruled);border-radius:var(--rsm);padding:12px 16px;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .13s}
+.br2:hover{border-color:#bbb}
+@page {
+  size: A4;
+  margin: 0mm;
+}
+@page :first {
+  margin: 0mm;
+}
+@media print {
+  /* Hide EVERYTHING on screen by default in print */
+  .page { display: none !important; }
+  /* Show only the dynamically-built PDF pages */
+  #pdf-cover { display: flex !important; }
+  #pdf-body { display: block !important; }
+
+  /* Show only the PDF cover and PDF body */
+  body { margin: 0; padding: 0; background: #fff; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* PDF COVER PAGE */
+  .pdf-cover {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    background: #2558E8 !important;
+    padding: 36px 44px 32px;
+    box-sizing: border-box;
+    page-break-after: always;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* PDF BODY PAGE */
+  .pdf-body {
+    display: flex !important;
+    flex-direction: column;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    background: #fff;
+    padding: 24px 28px 22px;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <img class="logo-img" src="data:image/webp;base64,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" alt="momencio">
+  <div class="hdr-tag">Quote Calculator &middot; 1&ndash;10 Events</div>
+</div>
+
+<div class="content">
+
+<!-- CLIENT INFO -->
+<div class="sl">Client information</div>
+<div class="cg">
+  <div class="field">
+    <label>Company name <span class="req-star">*</span></label>
+    <input type="text" id="iCo" placeholder="Acme Corp" oninput="checkReq();build()" class="req-input">
+    <div class="req-err" id="err-co">Required to generate quote</div>
+  </div>
+  <div class="field">
+    <label>Contact name</label>
+    <input type="text" id="iCt" placeholder="Jane Smith" oninput="build()">
+  </div>
+  <div class="field">
+    <label>Prepared by <span class="req-star">*</span></label>
+    <input type="text" id="iRep" placeholder="Your name" oninput="checkReq();build()" class="req-input">
+    <div class="req-err" id="err-rep">Required to generate quote</div>
+  </div>
+  <div class="field">
+    <label>Quote date <span class="req-star">*</span></label>
+    <input type="date" id="iDate" oninput="checkReq()" class="req-input">
+    <div class="req-err" id="err-date">Required to generate quote</div>
+  </div>
+</div>
+
+<!-- CORE PACKAGE -->
+<div class="sl">Core Package</div>
+<div class="plans" style="grid-template-columns:1fr">
+  <div class="plan sel">
+    <div class="pb pb-bl">Included</div>
+    <div class="pname">Core Package</div>
+    <div class="pprice">$500</div>
+    <div class="pprice-sub">5 seats &middot; per event</div>
+    <ul class="pfeat">
+      <li>5 reassignable seats included</li>
+      <li>Badge scanning (Event API)</li>
+      <li>Business card capture (OCR)</li>
+      <li>Survey &amp; smart notes</li>
+      <li>Lead management</li>
+      <li>IntelliStream&trade; Analytics</li>
+      <li>Event performance dashboard</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SEATS + EVENTS -->
+<div class="sl">Extra seats &amp; events</div>
+<div class="se">
+  <div>
+    <div class="field">
+      <label>Extra seats (beyond 5 included)</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <button onclick="chgSeat(-1)" class="seat-btn">&#8722;</button>
+        <div style="text-align:center">
+          <div id="xSeatDisplay" style="font-size:28px;font-weight:800;color:var(--blue);letter-spacing:-.5px;line-height:1">0</div>
+          <div style="font-size:9px;color:var(--subtle);margin-top:1px">extra seats</div>
+        </div>
+        <button onclick="chgSeat(1)" class="seat-btn">+</button>
+        <div style="font-size:12px;color:var(--muted);line-height:1.4;margin-left:2px">
+          <div>added to base 5</div>
+          <div id="xSeatCostLabel" style="font-size:12px;font-weight:700;color:var(--blue);margin-top:2px">$0 added</div>
+        </div>
+      </div>
+    </div>
+    <div class="field-hint" style="margin-top:10px">Base plan includes 5 seats. Extra seats charged at plan rate per event they attend.</div>
+  </div>
+  <div>
+    <div class="field" style="margin-bottom:0"><label>Number of events (1 &ndash; 10)</label></div>
+    <div class="epills" id="epills"></div>
+  </div>
+</div>
+
+<!-- ADD-ONS -->
+<div class="sl">Add-ons</div>
+<div class="ag">
+  <div class="ao" id="ao-eng" onclick="togA('eng')">
+    <div class="ck" id="ck-eng"></div>
+    <div class="ainfo">
+      <div class="aname">Engagement Layer</div>
+      <div class="adesc">Presentation &amp; advanced follow-up</div>
+    </div>
+    <div class="aright">
+      <div class="aprice" id="pr-eng">$250</div>
+      <div class="aprice-sub" id="pr-eng-sub">1 event &middot; $250 / event</div>
+    </div>
+  </div>
+  <div class="ao" id="ao-ob" onclick="togA('ob')">
+    <div class="ck" id="ck-ob"></div>
+    <div class="ainfo">
+      <div class="aname">Onboarding &amp; customer success</div>
+      <div class="adesc">Event setup &amp; user onboarding</div>
+    </div>
+    <div class="aright">
+      <div class="aprice" id="pr-ob">$150</div>
+      <div class="aprice-sub" id="pr-ob-sub">1 event &middot; $150 / event</div>
+    </div>
+  </div>
+  <div class="ao" id="ao-ai" onclick="togA('ai')">
+    <div class="ck" id="ck-ai"></div>
+    <div class="ainfo">
+      <div class="aname">AI EdgeCapture&trade;</div>
+      <div class="adesc">Lead enrichment &middot; $500 per 500 credits</div>
+    </div>
+    <div class="aright">
+      <div class="aprice" id="pr-ai">$500</div>
+      <div class="cc" onclick="event.stopPropagation()">
+        <button onclick="chgCred(-1)">&#8722;</button>
+        <span class="ccv" id="cvPacks">1</span>
+        <button onclick="chgCred(1)">+</button>
+      </div>
+      <div class="aprice-sub" id="cvLbl">500 credits / event</div>
+    </div>
+  </div>
+</div>
+
+<!-- CRM -->
+<div class="sl">CRM / Marketing automation &nbsp;<span style="font-weight:400;color:var(--subtle);font-size:10px;text-transform:none;letter-spacing:0">$150 / event</span></div>
+<div class="cr">
+  <div class="cb on"  id="crm-none"       onclick="selCRM('none')">No CRM</div>
+  <div class="cb"     id="crm-salesforce" onclick="selCRM('salesforce')">Salesforce</div>
+  <div class="cb"     id="crm-hubspot"    onclick="selCRM('hubspot')">HubSpot</div>
+  <div class="cb"     id="crm-marketo"    onclick="selCRM('marketo')">Marketo</div>
+  <div class="cb"     id="crm-dynamics"   onclick="selCRM('dynamics')">MS Dynamics</div>
+  <div class="cb"     id="crm-other"      onclick="selCRM('other')">Other</div>
+</div>
+
+<!-- GAMIFICATION -->
+<div class="sl">Gamification</div>
+<div class="gnote">Full rate per event &mdash; no volume discounts apply to gamification</div>
+<div class="gg">
+  <div class="gm" id="gm-spin"    onclick="togG('spin')"><div class="gi">&#127921;</div><div class="gn">Spin-to-Win</div><div class="gp">$1,250</div><div class="gs">/event</div><div class="gq"><button onclick="event.stopPropagation();chgG('spin',-1)">&#8722;</button><span class="gqv" id="qv-spin">1</span><button onclick="event.stopPropagation();chgG('spin',1)">+</button></div></div>
+  <div class="gm" id="gm-quiz"    onclick="togG('quiz')"><div class="gi">&#129504;</div><div class="gn">Quiz Challenge</div><div class="gp">$1,750</div><div class="gs">/event</div><div class="gq"><button onclick="event.stopPropagation();chgG('quiz',-1)">&#8722;</button><span class="gqv" id="qv-quiz">1</span><button onclick="event.stopPropagation();chgG('quiz',1)">+</button></div></div>
+  <div class="gm" id="gm-scratch" onclick="togG('scratch')"><div class="gi">&#127999;</div><div class="gn">Scratch-Off</div><div class="gp">$1,500</div><div class="gs">/event</div><div class="gq"><button onclick="event.stopPropagation();chgG('scratch',-1)">&#8722;</button><span class="gqv" id="qv-scratch">1</span><button onclick="event.stopPropagation();chgG('scratch',1)">+</button></div></div>
+  <div class="gm" id="gm-raffle"  onclick="togG('raffle')"><div class="gi">&#127922;</div><div class="gn">Raffle</div><div class="gp">$1,500</div><div class="gs">/event</div><div class="gq"><button onclick="event.stopPropagation();chgG('raffle',-1)">&#8722;</button><span class="gqv" id="qv-raffle">1</span><button onclick="event.stopPropagation();chgG('raffle',1)">+</button></div></div>
+  <div class="gm" id="gm-memory"  onclick="togG('memory')"><div class="gi">&#127183;</div><div class="gn">Memory Game</div><div class="gp">$1,750</div><div class="gs">/event</div><div class="gq"><button onclick="event.stopPropagation();chgG('memory',-1)">&#8722;</button><span class="gqv" id="qv-memory">1</span><button onclick="event.stopPropagation();chgG('memory',1)">+</button></div></div>
+</div>
+
+<!-- QUOTE TABLE -->
+<div class="sl">Quote breakdown</div>
+<div class="qt">
+  <div class="qth">
+    <div></div><div></div>
+    <div class="tr">Units</div>
+    <div class="tr">Unit cost</div>
+    <div class="tr">Subtotal</div>
+  </div>
+  <div id="qtBody"></div>
+</div>
+
+<div class="saved" id="saved"></div>
+
+<div class="tbar">
+  <div class="tl">
+    <div class="tt">Total amount</div>
+    <div class="tn" id="tNote">Annual investment &middot; 1 event</div>
+  </div>
+  <div class="tr2">
+    <div class="ta"><span class="tsup">$</span><span id="tNum">&#8212;</span></div>
+    <div class="tsub">+ Sales Tax as applicable</div>
+  </div>
+</div>
+
+<div class="krow">
+  <div class="kpi"><div class="kv" id="kEv">&#8212;</div><div class="kl">Cost per event</div></div>
+  <div class="kpi"><div class="kv" id="kSeat">&#8212;</div><div class="kl">Cost per event per seat</div></div>
+</div>
+
+<div id="discBanner" style="display:none;align-items:center;gap:8px;background:#E8F7EF;border:1px solid #A7F3D0;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:500;color:#1A7A4A;margin-bottom:16px"></div>
+<div class="sl no-print">Notes</div>
+<textarea class="no-print" id="iNotes" placeholder="Add custom notes, discount details, or special terms..."></textarea>
+<div id="pNotes" style="display:none;padding:9px 12px;background:#EBF0FF;border-left:3px solid #2563FF;border-radius:4px;font-size:12px;color:#2C2C2A;margin-bottom:13px"></div>
+
+<div class="acts no-print">
+  <div class="bp-wrap">
+    <button class="bp" id="dlBtn" onclick="doDownload()" disabled>&#11015; &nbsp;Download Quote as PDF</button>
+    <div class="bp-tooltip" id="dlTooltip">Fill in required fields first</div>
+  </div>
+  <button class="br2" onclick="doReset()">Reset</button>
+</div>
+
+</div>
+
+
+</div>
+
+<script>
+// ── PER-EVENT BASE PRICES (anchored to 1-event invoice) ──────────────────
+// 1 event: Capture core 5-seat = $500, extra seat $100/event
+// Engage: $750 base (incl. engagement bundle), extra seat $150/event
+// Amaze: $980 base, extra seat $150/event
+// Onboarding: $150 for 1 event, scales linearly with events
+// CRM: $150/event, AI EdgeCapture: $250/250 credits per event, gamification: fixed/event
+
+var PEV = {
+  capture: { base:500, seat:100 },
+  engage:  { base:500, seat:100 },
+  amaze:   { base:500, seat:100 }
+};
+var ENGAGE_PEV  = { capture:0, engage:0, amaze:0 };
+var ENG_ADDON   = 250;   // Engagement layer add-on: $250/event
+var OB_PEV      = 150;   // per event, scales linearly
+var AI_PEV      = 500;   // per 500-credit pack per event
+var CRM_PEV     = 150;   // per event
+var GAMI_P      = {spin:1250,quiz:1750,scratch:1500,raffle:1500,memory:1750};
+
+// Volume multiplier: full rate for 1-2 events, discount grows from 3+ to 25% at 10
+var VOL = {1:1.000,2:2.000,3:3.000,4:3.857,5:4.643,6:5.357,7:6.000,8:6.571,9:7.071,10:7.500};
+
+var S = {
+  plan:"capture", events:1, xSeats:0, crm:"none",
+  addons:{ob:false,ai:false,eng:false}, credPacks:1,
+  gami:{spin:false,quiz:false,scratch:false,raffle:false,memory:false},
+  gamiQty:{spin:1,quiz:1,scratch:1,raffle:1,memory:1}
+};
+
+function ge(id){return document.getElementById(id)}
+function fmtN(n){return Math.round(n).toLocaleString("en-US")}
+function fmtD(n){return "$"+fmtN(n)}
+function sup(n){return "<span class=\"sup\">$</span>"+fmtN(n)}
+function dash(){return "<span style=\"color:var(--ruled)\">&#8211;</span>"}
+
+function buildPills(){
+  var c=ge("epills"); c.innerHTML="";
+  for(var i=1;i<=10;i++){
+    var d=document.createElement("div");
+    d.className="ep"+(S.events===i?" act":"");
+    d.id="ep"+i;
+    d.innerHTML="<div>"+i+"</div><div class=\"ep-sub\">ev"+(i>1?"s":"")+"</div>";
+    d.onclick=(function(n){return function(){selEv(n)}})(i);
+    c.appendChild(d);
+  }
+}
+
+function selEv(n){
+  S.events=n;
+  for(var i=1;i<=10;i++){var e=ge("ep"+i);if(e)e.className="ep"+(i===n?" act":"")}
+  build();
+}
+
+function selPlan(p){
+  S.plan=p;
+  ["capture","engage","amaze"].forEach(function(x){ge("pl-"+x).classList.toggle("sel",x===p)});
+  build();
+}
+
+function selCRM(c){
+  S.crm=c;
+  ["none","salesforce","hubspot","marketo","dynamics","other"].forEach(function(x){ge("crm-"+x).classList.toggle("on",x===c)});
+  build();
+}
+
+function togA(id){
+  S.addons[id]=!S.addons[id];
+  ge("ao-"+id).classList.toggle("on",S.addons[id]);
+  ge("ck-"+id).textContent=S.addons[id]?"\u2713":"";
+  build();
+}
+
+function chgSeat(d){
+  S.xSeats=Math.max(0,S.xSeats+d);
+  ge("xSeatDisplay").textContent=S.xSeats;
+  build();
+}
+
+function chgCred(d){
+  S.credPacks=Math.max(1,S.credPacks+d);
+  ge("cvPacks").textContent=S.credPacks;
+  ge("cvLbl").textContent=(S.credPacks*500).toLocaleString()+" credits / event";
+  build();
+}
+
+function togG(id){S.gami[id]=!S.gami[id];ge("gm-"+id).classList.toggle("on",S.gami[id]);build()}
+function chgG(id,d){S.gamiQty[id]=Math.max(1,S.gamiQty[id]+d);ge("qv-"+id).textContent=S.gamiQty[id];build()}
+
+function build(){
+  var ev    = S.events;
+  var vol   = VOL[ev];
+  var xSeat = S.xSeats;
+  var seats  = 5 + xSeat;
+
+  var p = PEV[S.plan];
+
+  // Core: $500/event flat (no volume discount), units = events
+  var baseTotal   = p.base * ev;
+  var xSeatTotal  = Math.round(p.seat * xSeat); // flat per-event rate, not multiplied by all events
+  var engTotal    = S.addons.eng ? ENG_ADDON * ev : 0;
+  var subTotal    = baseTotal + xSeatTotal + engTotal;
+
+  // Onboarding: $150 * events (fully linear - no volume discount)
+  var obTotal  = S.addons.ob  ? OB_PEV * ev : 0;
+  var aiTotal  = S.addons.ai  ? AI_PEV * S.credPacks * ev : 0;
+  var crmTotal = S.crm!=="none" ? CRM_PEV * ev : 0;
+
+  // Gamification: always straight ev * qty * price
+  var gamiTotal=0;
+  Object.keys(S.gami).forEach(function(id){
+    if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id]*ev;
+  });
+
+  var total = subTotal + obTotal + aiTotal + crmTotal + gamiTotal;
+  var fullRate = total;
+  var savings = 0;
+
+  // ── UPDATE PLAN CARDS with live prices ──────────────────────────────────
+  // (only one plan now - core package, no plan cards to update)
+
+  // Update extra seat counter label
+  var xSeatCost = Math.round(PEV[S.plan].seat * xSeat); // flat per-event rate
+  ge("xSeatCostLabel").textContent = xSeat>0 ? fmtD(xSeatCost)+" added" : "$0 added";
+
+  // ── ENGAGEMENT addon live price ──────────────────────────────────────────
+  ge("pr-eng").textContent = fmtD(ENG_ADDON * ev);
+  ge("pr-eng-sub").textContent = ev+" event"+(ev>1?"s":"")+" \u00b7 $250 / event";
+
+  // ── ONBOARDING addon live price ──────────────────────────────────────────
+  ge("pr-ob").textContent = fmtD(OB_PEV * ev);
+  ge("pr-ob-sub").textContent = ev+" event"+(ev>1?"s":"")+" \u00b7 $150 / event";
+
+  // ── AI price ─────────────────────────────────────────────────────────────
+  ge("pr-ai").textContent = fmtD(AI_PEV * S.credPacks);
+  ge("cvLbl").textContent = (S.credPacks*500).toLocaleString()+" credits / event";
+
+
+
+  // ── QUOTE TABLE ──────────────────────────────────────────────────────────
+  var html="";
+
+  // Event Bundle (Core Package) - units = events
+  html+=qrow("Event Bundle", "Core Package (5 Seats) &middot; Capture/Survey/Notes",
+    ""+ev, fmtD(p.base), sup(baseTotal), false);
+  var xDesc = xSeat>0 ? "Extra Seats (\u00d7"+xSeat+")" : "Extra Seats";
+  html+=qrow("", xDesc,
+    xSeat>0?""+xSeat:dash(),
+    xSeat>0?fmtD(p.seat)+" per seat":dash(),
+    xSeat>0?sup(xSeatTotal):dash(), true);
+  html+=qgap();
+
+  // Engagement Bundle (now an add-on, units = 1)
+  html+=qrow("Engagement Bundle",
+    "Digital Assets Library &middot; Presentation of Assets &middot; Email Follow-up with Landing Pages",
+    S.addons.eng?"1":dash(),
+    S.addons.eng?fmtD(engTotal):dash(),
+    S.addons.eng?sup(engTotal):dash(), false);
+  html+=qgap();
+
+  // Analytics Bundle
+  html+=qrow("Analytics Bundle",
+    "360 Live Analytics &middot; Event Performance Dashboard &middot; Lead Activity Tracking &middot; Engagement Scoring &middot; Live Alerts",
+    dash(), dash(), dash(), false);
+  html+=qgap();
+
+  // Integrations - units = 1
+  var cNames={none:"No CRM selected",salesforce:"Salesforce Connector",hubspot:"HubSpot Connector License",marketo:"Marketo Connector",dynamics:"MS Dynamics Connector",other:"Custom CRM Connector"};
+  html+=qrow("Integrations",
+    cNames[S.crm]+(S.crm!=="none"?" &middot; per event":""),
+    S.crm!=="none"?"1":dash(),
+    S.crm!=="none"?fmtD(crmTotal):dash(),
+    S.crm!=="none"?sup(crmTotal):dash(), false);
+  html+=qgap();
+
+  // Setup - units = 1
+  html+=qrow("Setup",
+    "Event Setup &amp; User Onboarding",
+    S.addons.ob?"1":dash(),
+    S.addons.ob?fmtD(obTotal):dash(),
+    S.addons.ob?sup(obTotal):dash(), false);
+  html+=qgap();
+
+  // EdgeCapture - units = 1
+  html+=qrow("EdgeCapture",
+    "AI Lead Enrichment Service &middot; "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits / event":"&#8211; credits"),
+    S.addons.ai?"1":dash(),
+    S.addons.ai?fmtD(aiTotal):dash(),
+    S.addons.ai?sup(aiTotal):dash(), false);
+  html+=qgap();
+
+  // Gamification
+  var gAct=Object.keys(S.gami).filter(function(id){return S.gami[id]});
+  var gN={spin:"Spin-to-Win",quiz:"Quiz Challenge",scratch:"Scratch-Off",raffle:"Raffle",memory:"Memory Game"};
+  var gDesc=gAct.length>0
+    ? gAct.map(function(id){return gN[id]+(S.gamiQty[id]>1?" \u00d7"+S.gamiQty[id]:"")}).join(" &middot; ")
+    : "Raffle / Spin to Win &middot; Quiz Challenge &middot; Scratch-Off";
+  var gamiUnitCost = gAct.length>0 ? fmtD(Math.round(gamiTotal/ev/gAct.reduce(function(a,id){return a+S.gamiQty[id]},0))) : dash();
+  html+=qrow("Gamification", gDesc,
+    gAct.length>0?""+ev:dash(),
+    gAct.length>0?gamiUnitCost:dash(),
+    gAct.length>0?sup(gamiTotal):dash(), false);
+
+  ge("qtBody").innerHTML=html;
+
+  // ── TOTALS ───────────────────────────────────────────────────────────────
+  ge("tNum").textContent   = fmtN(total);
+  ge("tNote").textContent  = "Annual investment \u00b7 "+ev+" event"+(ev>1?"s":"");
+  ge("kEv").textContent    = fmtD(total/ev);
+  ge("kSeat").textContent  = fmtD(total/ev/seats);
+
+  // Discount badge - removed (no plan tiers, no discount)
+  ge("discBanner").style.display = "none";
+
+  var sv=ge("saved");
+  sv.classList.remove("on");
+}
+
+function qrow(cat,desc,units,ucost,subtotal,alt){
+  var isDash = subtotal==="<span style=\"color:var(--ruled)\">&#8211;</span>";
+  return "<div class=\"qtr"+(alt?" alt":"")+"\">"
+    +"<div><div class=\"qcat\">"+cat+"</div></div>"
+    +"<div><div class=\"qdesc\">"+desc+"</div></div>"
+    +"<div class=\"qr\"><div class=\"qu\">"+units+"</div></div>"
+    +"<div class=\"qr\"><div class=\"quc"+(isDash?"":+" blu")+"\">"+ucost+"</div></div>"
+    +"<div class=\"qr\"><div class=\"qst"+(isDash?" dash":"")+"\">"+(isDash?dash():subtotal)+"</div></div>"
+    +"</div>";
+}
+function qgap(){return "<div class=\"qtr gap\"></div>"}
+
+function doDownload(){
+  if(!checkReq()){showReqErrors();return;}
+  var co   = ge("iCo").value.trim()  || "Client";
+  var ct   = ge("iCt").value.trim()  || "";
+  var rep  = ge("iRep").value.trim() || "";
+  var dt   = ge("iDate").value       || new Date().toISOString().split("T")[0];
+  var notes = ge("iNotes").value;
+  var dObj  = new Date(dt+"T12:00:00");
+  var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var niceDate = months[dObj.getMonth()]+" "+dObj.getDate()+", "+dObj.getFullYear();
+  var planNames = {capture:"Capture",engage:"Engage",amaze:"Amaze"};
+  var planLabel = "Core Package";
+  var ev = S.events;
+  var logoSrc = "data:image/webp;base64,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";
+
+  // Logo strip — 8 client logos, inline styles, no external requests
+  var logoStrip = "<div style='display:flex;gap:7px;width:100%;'><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:13px;font-weight:700;color:#8B0000;letter-spacing:1.5px;white-space:nowrap;'>Vanguard</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:12px;font-weight:800;color:#D50000;letter-spacing:0;white-space:nowrap;'>ExxonMobil</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:14px;font-weight:800;color:#006CB5;letter-spacing:0;white-space:nowrap;'>Bayer</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:12px;font-weight:700;color:#D4002A;letter-spacing:-0.3px;white-space:nowrap;'>Comcast</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:10px;font-weight:700;color:#8B0000;letter-spacing:0;white-space:nowrap;'>Penn Medicine</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:10px;font-weight:700;color:#006F3C;letter-spacing:0;white-space:nowrap;'>NatureWorks</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:13px;font-weight:700;color:#0066CC;letter-spacing:0;white-space:nowrap;'>Clinisys</span></div><div style='display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.95);border-radius:8px;padding:8px 0;flex:1;height:48px;'><span style='font-family:Plus Jakarta Sans,system-ui,sans-serif;font-size:13px;font-weight:800;color:#E85D26;letter-spacing:1px;white-space:nowrap;'>Rajant</span></div></div>";
+
+  // ── COVER PAGE ──────────────────────────────────────────────────────────
+  var cover = ge("pdf-cover");
+
+  var infoGrid = "";
+  if(ct)  infoGrid += "<div style='background:rgba(255,255,255,0.1);border-radius:7px;padding:10px 14px'><div style='font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px'>Prepared for</div><div style='font-size:14px;font-weight:700;color:#fff'>" + ct + "</div><div style='font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px'>" + co + "</div></div>";
+  if(rep) infoGrid += "<div style='background:rgba(255,255,255,0.1);border-radius:7px;padding:10px 14px'><div style='font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px'>Prepared by</div><div style='font-size:14px;font-weight:700;color:#fff'>" + rep + "</div><div style='font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px'>momencio</div></div>";
+  infoGrid += "<div style='background:rgba(255,255,255,0.1);border-radius:7px;padding:10px 14px'><div style='font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px'>Date</div><div style='font-size:14px;font-weight:700;color:#fff'>" + niceDate + "</div></div>";
+  infoGrid += "<div style='background:rgba(255,255,255,0.1);border-radius:7px;padding:10px 14px'><div style='font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px'>Plan</div><div style='font-size:14px;font-weight:700;color:#fff'>" + planLabel + " &middot; " + ev + " event" + (ev>1?"s":"") + "</div></div>" +
+  (ev>=3 ? "" : "");
+
+  cover.innerHTML = 
+    "<div style='margin-bottom:20px'>" +
+      "<img src='" + logoSrc + "' style='width:240px;height:auto;border-radius:14px;display:block;margin-bottom:22px' alt='momencio'>" +
+      "<div style='font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px'>Quote Proposal</div>" +
+      "<h1 style='font-size:40px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:12px'>Quote for<br>" + co + "</h1>" +
+      "<div style='width:48px;height:3px;background:rgba(255,255,255,0.3);border-radius:2px;margin-bottom:18px'></div>" +
+    "</div>" +
+    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:18px'>" + infoGrid + "</div>" +
+    "<div style='margin-bottom:16px'>" +
+      "<div style='font-size:14px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.3'>Industry's cutting edge lead capturing solution also used by</div>" +
+      logoStrip +
+    "</div>" +
+    "<div style='height:1px;background:rgba(255,255,255,0.2);margin-bottom:14px'></div>" +
+    "<div style='display:flex;align-items:center;gap:12px;margin-bottom:14px'>" +
+      "<div style='display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border-radius:7px;padding:8px 12px'>" +
+        "<svg width='24' height='24' viewBox='0 0 24 24' fill='none'><rect width='24' height='24' rx='5' fill='#FF492C'/><text x='12' y='17' text-anchor='middle' fill='white' font-family='Arial Black,sans-serif' font-size='11' font-weight='900'>G2</text></svg>" +
+        "<div><div style='color:#FFD700;font-size:10px;letter-spacing:2px'>&#9733;&#9733;&#9733;&#9733;&#9733;</div><div style='font-size:11px;font-weight:700;color:#fff'>4.9/5 Stars on G2</div></div>" +
+      "</div>" +
+      "<div style='display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border-radius:7px;padding:8px 12px'>" +
+        "<svg width='24' height='24' viewBox='0 0 24 24' fill='none'><rect width='24' height='24' rx='5' fill='rgba(255,255,255,0.15)'/><circle cx='12' cy='12' r='9' stroke='rgba(255,255,255,0.5)' stroke-width='1' fill='none'/><text x='12' y='9' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-size='3.2' font-weight='700'>EVENT TECH</text><text x='12' y='13.5' text-anchor='middle' fill='#FFD700' font-family='Arial,sans-serif' font-size='3.8' font-weight='800'>AWARDS</text><text x='12' y='18' text-anchor='middle' fill='rgba(255,255,255,0.6)' font-family='Arial,sans-serif' font-size='2.8'>LONDON 2025</text></svg>" +
+        "<div><div style='font-size:11px;font-weight:700;color:#fff'>Best Conference Tech 2025</div><div style='font-size:9px;color:rgba(255,255,255,0.5)'>Event Technology Awards &middot; London</div></div>" +
+      "</div>" +
+    "</div>";
+
+  // ── PAGE 2: QUOTE BREAKDOWN ───────────────────────────────────────────────
+  var body = ge("pdf-body");
+  var totalAmt  = ge("tNum").textContent;
+  var costPev   = ge("kEv").textContent;
+  var costPseat = ge("kSeat").textContent;
+  var sv        = ge("saved");
+  var savedTxt  = sv.classList.contains("on")
+    ? "<div style='background:#E8F7EF;border:1px solid #A7F3D0;border-radius:5px;padding:6px 11px;font-size:10px;font-weight:600;color:#1A7A4A;margin-bottom:10px'>" + sv.innerHTML + "</div>" : "";
+  var notesHTML = notes
+    ? "<div style='margin-top:12px;padding:8px 11px;background:#EBF0FF;border-left:3px solid #2558E8;border-radius:4px;font-size:10px;color:#2C2C2A'><strong>Notes:</strong> " + notes + "</div>" : "";
+
+  body.innerHTML =
+    "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:11px;border-bottom:2.5px solid #2558E8'>" +
+      "<div>" +
+        "<div style='font-size:8.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#A0A09A;margin-bottom:2px'>Quote Breakdown</div>" +
+        "<div style='font-size:20px;font-weight:800;color:#1C1B19;letter-spacing:-0.3px'>" + co + "</div>" +
+      "</div>" +
+      "<div style='text-align:right'>" +
+        "<div style='font-size:10px;color:#A0A09A;margin-bottom:1px'>" + niceDate + "</div>" +
+        "<div style='font-size:10px;font-weight:600;color:#6B6B65'>" + planLabel + " &nbsp;&middot;&nbsp; " + ev + " event" + (ev>1?"s":"") + "</div>" +
+      "</div>" +
+    "</div>" +
+    "<table style='width:100%;border-collapse:collapse;margin-bottom:12px'>" +
+      "<thead><tr style='background:#1C1B19'>" +
+        "<td style='padding:9px 12px;color:rgba(255,255,255,0.55);font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;width:118px'>Category</td>" +
+        "<td style='padding:9px 12px;color:rgba(255,255,255,0.55);font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase'>Description</td>" +
+        "<td style='padding:9px 12px;color:rgba(255,255,255,0.55);font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;text-align:right;width:46px'>Units</td>" +
+        "<td style='padding:9px 12px;color:rgba(255,255,255,0.55);font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;text-align:right;width:80px'>Unit cost</td>" +
+        "<td style='padding:9px 12px;color:rgba(255,255,255,0.55);font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;text-align:right;width:80px'>Subtotal</td>" +
+      "</tr></thead>" +
+      "<tbody>" + buildPrintRows() + "</tbody>" +
+    "</table>" +
+    savedTxt +
+    "<div style='background:#2558E8;border-radius:8px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px'>" +
+      "<div><div style='font-size:14px;font-weight:800;color:#fff'>Total amount</div><div style='font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px'>Annual investment &middot; " + ev + " event" + (ev>1?"s":"") + "</div></div>" +
+      "<div style='text-align:right'><div style='font-size:30px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1'><span style='font-size:14px;vertical-align:super;font-weight:700'>$</span>" + totalAmt + "</div><div style='font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px'>+ Sales Tax as applicable</div></div>" +
+    "</div>" +
+    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px'>" +
+      "<div style='background:#EEF3FF;border:1px solid #BFCFFF;border-radius:7px;padding:14px 16px;text-align:center'><div style='font-size:22px;font-weight:800;color:#2558E8;letter-spacing:-0.5px'>" + costPev + "</div><div style='font-size:9px;color:#6B6B65;text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;font-weight:600'>Cost per event</div></div>" +
+      "<div style='background:#EEF3FF;border:1px solid #BFCFFF;border-radius:7px;padding:14px 16px;text-align:center'><div style='font-size:22px;font-weight:800;color:#2558E8;letter-spacing:-0.5px'>" + costPseat + "</div><div style='font-size:9px;color:#6B6B65;text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;font-weight:600'>Cost per event per seat</div></div>" +
+    "</div>" +
+    notesHTML;
+
+  // Show divs, print, hide after
+  var cvr = ge("pdf-cover");
+  var bdy = ge("pdf-body");
+  cvr.style.display = "";
+  bdy.style.display = "";
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){
+      cvr.style.display = "none";
+      bdy.style.display = "none";
+    }, 1000);
+  }, 120);
+}
+
+function buildPrintRows(){
+  var ev   = S.events;
+  var p    = PEV[S.plan];
+  var xSeat= S.xSeats;
+  var baseTotal  = p.base * ev;
+  var xSeatTotal = Math.round(p.seat * xSeat);
+  var engTotal   = S.addons.eng ? ENG_ADDON * ev : 0;
+  var obTotal    = S.addons.ob    ? OB_PEV * ev : 0;
+  var aiTotal    = S.addons.ai    ? AI_PEV * S.credPacks * ev : 0;
+  var crmTotal   = S.crm!=="none" ? CRM_PEV * ev : 0;
+  var gamiTotal  = 0;
+  Object.keys(S.gami).forEach(function(id){if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id]*ev;});
+  var cN={none:"No CRM selected",salesforce:"Salesforce Connector",hubspot:"HubSpot Connector",marketo:"Marketo Connector",dynamics:"MS Dynamics Connector",other:"Custom CRM Connector"};
+  var gN={spin:"Spin-to-Win",quiz:"Quiz Challenge",scratch:"Scratch-Off",raffle:"Raffle",memory:"Memory Game"};
+  var gAct=Object.keys(S.gami).filter(function(id){return S.gami[id];});
+  var gDesc=gAct.length>0?gAct.map(function(id){return gN[id]+(S.gamiQty[id]>1?" ×"+S.gamiQty[id]:"");}).join(" · "):"Not selected";
+
+  function pr(cat,desc,units,ucost,sub,alt){
+    var bg=alt?"#EEF3FF":"#fff";
+    var subCell  = sub===null  ? "<span style='color:#CDCDC6'>&#8211;</span>" : "<strong style='color:#2558E8;font-size:13px'>$"+Math.round(sub).toLocaleString("en-US")+"</strong>";
+    var ucostCell= ucost===null? "<span style='color:#CDCDC6'>&#8211;</span>" : "<span style='font-size:11px;color:#6B6B65'>"+ucost+"</span>";
+    var unitCell = units===null? "<span style='color:#CDCDC6'>&#8211;</span>" : "<span style='font-size:12px;font-weight:700;color:#1C1B19'>"+units+"</span>";
+    return "<tr style='background:"+bg+";border-bottom:1px solid #E4E4DE'>"
+      +"<td style='padding:11px 12px;font-size:12px;font-weight:800;color:#1C1B19;vertical-align:top;white-space:nowrap'>"+cat+"</td>"
+      +"<td style='padding:11px 12px;font-size:10.5px;color:#6B6B65;vertical-align:top;line-height:1.5'>"+desc+"</td>"
+      +"<td style='padding:11px 12px;text-align:right;vertical-align:top'>"+unitCell+"</td>"
+      +"<td style='padding:11px 12px;text-align:right;vertical-align:top'>"+ucostCell+"</td>"
+      +"<td style='padding:11px 12px;text-align:right;vertical-align:top'>"+subCell+"</td>"
+      +"</tr>"
+      +"<tr style='height:2px;background:#F5F5F1'><td colspan='5'></td></tr>";
+  }
+
+  var rows="";
+  // Core Package - units = events
+  rows+=pr("Event Bundle", "Core Package (5 Seats) · Capture/Survey/Notes",ev,"$"+fmtN(Math.round(p.base)),baseTotal,false);
+  rows+=pr("",xSeat>0?"Extra Seats (×"+xSeat+")":"Extra Seats",xSeat>0?xSeat:null,xSeat>0?"$"+fmtN(p.seat)+" / seat":null,xSeat>0?xSeatTotal:null,true);
+  // Engagement - units = 1
+  rows+=pr("Engagement","Digital Assets Library · Presentations · Email Follow-up w/ Landing Pages",S.addons.eng?1:null,S.addons.eng?"$"+fmtN(engTotal):null,S.addons.eng?engTotal:null,false);
+  rows+=pr("Analytics","360 Live Analytics · Event Dashboard · Lead Activity Tracking · Engagement Scoring",null,null,null,true);
+  // Integrations - units = 1
+  rows+=pr("Integrations",cN[S.crm]+(S.crm!=="none"?" · per event":""),S.crm!=="none"?1:null,S.crm!=="none"?"$"+fmtN(crmTotal):null,S.crm!=="none"?crmTotal:null,false);
+  // Setup - units = 1
+  rows+=pr("Setup","Event Setup & User Onboarding",S.addons.ob?1:null,S.addons.ob?"$"+fmtN(obTotal):null,S.addons.ob?obTotal:null,true);
+  // EdgeCapture - units = 1, 500 credits per pack
+  rows+=pr("EdgeCapture","AI Lead Enrichment · "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits/event":"not selected"),S.addons.ai?1:null,S.addons.ai?"$"+fmtN(aiTotal):null,S.addons.ai?aiTotal:null,false);
+  // Gamification - units = 1
+  rows+=pr("Gamification",gDesc,gAct.length>0?1:null,gAct.length>0?"$"+fmtN(gamiTotal):null,gAct.length>0?gamiTotal:null,true);
+  return rows;
+}
+
+function checkReq(){
+  var co  = ge("iCo").value.trim();
+  var rep = ge("iRep").value.trim();
+  var dt  = ge("iDate").value.trim();
+  var ok  = !!(co && rep && dt);
+  var btn = ge("dlBtn");
+  if(btn) btn.disabled = !ok;
+  return ok;
+}
+
+function showReqErrors(){
+  var co  = ge("iCo").value.trim();
+  var rep = ge("iRep").value.trim();
+  var dt  = ge("iDate").value.trim();
+  ge("iCo").classList.toggle("invalid",  !co);
+  ge("err-co").classList.toggle("show",  !co);
+  ge("iRep").classList.toggle("invalid", !rep);
+  ge("err-rep").classList.toggle("show", !rep);
+  ge("iDate").classList.toggle("invalid",!dt);
+  ge("err-date").classList.toggle("show",!dt);
+  if(!co)       ge("iCo").focus();
+  else if(!rep) ge("iRep").focus();
+  else if(!dt)  ge("iDate").focus();
+}
+
+function doReset(){
+  selPlan("capture"); selCRM("none");
+  ["ob","ai"].forEach(function(id){ if(S.addons[id]) togA(id); });
+  S.credPacks=1;
+  ge("cvPacks").textContent=1;
+  ge("cvLbl").textContent="250 credits / event";
+  Object.keys(S.gami).forEach(function(id){
+    if(S.gami[id]){ S.gami[id]=false; ge("gm-"+id).classList.remove("on"); }
+    S.gamiQty[id]=1; ge("qv-"+id).textContent=1;
+  });
+  S.xSeats=0;
+  ge("xSeatDisplay").textContent=0;
+  ge("xSeatCostLabel").textContent="$0 added";
+  ge("iCo").value=""; ge("iCt").value=""; ge("iRep").value=""; ge("iNotes").value="";
+  ["iCo","iRep","iDate"].forEach(function(id){ ge(id).classList.remove("invalid"); });
+  ["err-co","err-rep","err-date"].forEach(function(id){ ge(id).classList.remove("show"); });
+  S.events=1; buildPills(); build(); checkReq();
+}
+
+ge("iDate").value=new Date().toISOString().split("T")[0];
+buildPills();
+build();
+checkReq();
+</script>
+
+<!-- PDF COVER - hidden on screen, built dynamically before print -->
+<div id="pdf-cover" class="pdf-cover" style="display:none"></div>
+<!-- PDF BODY - hidden on screen, built dynamically before print -->
+<div id="pdf-body" class="pdf-body" style="display:none"></div>
+
+</body>
+</html>
