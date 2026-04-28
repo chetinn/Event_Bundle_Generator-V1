@@ -505,7 +505,7 @@ function build(){
   // Gamification: always straight ev * qty * price
   var gamiTotal=0;
   Object.keys(S.gami).forEach(function(id){
-    if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id]*ev;
+    if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id];
   });
 
   var total = subTotal + obTotal + aiTotal + crmTotal + gamiTotal;
@@ -765,7 +765,7 @@ function buildPrintRows(){
   var aiTotal    = S.addons.ai    ? AI_PEV * S.credPacks : 0;
   var crmTotal   = S.crm!=="none" ? CRM_PEV * ev : 0;
   var gamiTotal  = 0;
-  Object.keys(S.gami).forEach(function(id){if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id]*ev;});
+  Object.keys(S.gami).forEach(function(id){if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id];});
   var cN={none:"No CRM selected",salesforce:"Salesforce Connector",hubspot:"HubSpot Connector",marketo:"Marketo Connector",dynamics:"MS Dynamics Connector",other:"Custom CRM Connector"};
   var gN={spin:"Spin-to-Win",quiz:"Quiz Challenge",scratch:"Scratch-Off",raffle:"Raffle",memory:"Memory Game"};
   var gAct=Object.keys(S.gami).filter(function(id){return S.gami[id];});
