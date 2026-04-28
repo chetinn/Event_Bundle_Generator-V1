@@ -149,6 +149,18 @@ textarea:focus{outline:none;border-color:var(--blue);background:#fff}
   #pdf-cover { display: flex !important; }
   #pdf-body { display: block !important; }
 
+  /* Hide browser extension overlays (Apollo, Grammarly, LastPass, etc.) */
+  [id*="apollo"], [class*="apollo"], [id*="Apollo"], [class*="Apollo"],
+  [id*="extension"], [class*="extension"],
+  [class*="grammarly"], grammarly-extension, grammarly-desktop-integration,
+  [data-lastpass-icon-root], [data-lastpass-root],
+  div[id^="chrome-extension"], iframe[src*="chrome-extension"],
+  div[style*="z-index: 2147483"], div[style*="z-index:2147483"],
+  body > div:not(.page):not(#pdf-cover):not(#pdf-body):not(.no-print) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
   /* Show only the PDF cover and PDF body */
   body { margin: 0; padding: 0; background: #fff; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
@@ -567,22 +579,21 @@ function build(){
 
   // EdgeCapture - units = 1
   html+=qrow("EdgeCapture",
-    "AI Lead Enrichment Service &middot; "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits / event":"&#8211; credits"),
+    "AI Lead Enrichment Service &middot; "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits per event":"Block of 500 credits"),
     S.addons.ai?"1":dash(),
     S.addons.ai?fmtD(aiTotal):dash(),
     S.addons.ai?sup(aiTotal):dash(), false);
   html+=qgap();
 
-  // Gamification
+  // Gamification - units = 1
   var gAct=Object.keys(S.gami).filter(function(id){return S.gami[id]});
   var gN={spin:"Spin-to-Win",quiz:"Quiz Challenge",scratch:"Scratch-Off",raffle:"Raffle",memory:"Memory Game"};
   var gDesc=gAct.length>0
     ? gAct.map(function(id){return gN[id]+(S.gamiQty[id]>1?" \u00d7"+S.gamiQty[id]:"")}).join(" &middot; ")
     : "Raffle / Spin to Win &middot; Quiz Challenge &middot; Scratch-Off";
-  var gamiUnitCost = gAct.length>0 ? fmtD(Math.round(gamiTotal/ev/gAct.reduce(function(a,id){return a+S.gamiQty[id]},0))) : dash();
   html+=qrow("Gamification", gDesc,
-    gAct.length>0?""+ev:dash(),
-    gAct.length>0?gamiUnitCost:dash(),
+    gAct.length>0?"1":dash(),
+    gAct.length>0?fmtD(gamiTotal):dash(),
     gAct.length>0?sup(gamiTotal):dash(), false);
 
   ge("qtBody").innerHTML=html;
@@ -712,11 +723,33 @@ function doDownload(){
   var bdy = ge("pdf-body");
   cvr.style.display = "";
   bdy.style.display = "";
+  
+  // Remove any browser extension elements before printing
+  var removed = [];
+  var allDivs = document.body.querySelectorAll(':scope > *');
+  allDivs.forEach(function(el){
+    var id = (el.id || "").toLowerCase();
+    var cls = (el.className && typeof el.className === "string") ? el.className.toLowerCase() : "";
+    var tag = el.tagName.toLowerCase();
+    // Skip our own elements
+    if (el === cvr || el === bdy || el.classList.contains("page") || tag === "script" || tag === "style") return;
+    // Hide browser extension elements
+    if (id.includes("apollo") || cls.includes("apollo") || 
+        id.includes("extension") || cls.includes("extension") ||
+        id.includes("grammarly") || cls.includes("grammarly") ||
+        tag.includes("grammarly") || tag.includes("apollo")) {
+      removed.push({el: el, display: el.style.display});
+      el.style.display = "none";
+    }
+  });
+  
   setTimeout(function(){
     window.print();
     setTimeout(function(){
       cvr.style.display = "none";
       bdy.style.display = "none";
+      // Restore hidden extension elements
+      removed.forEach(function(r){ r.el.style.display = r.display; });
     }, 1000);
   }, 120);
 }
