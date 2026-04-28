@@ -499,7 +499,7 @@ function build(){
 
   // Onboarding: $150 * events (fully linear - no volume discount)
   var obTotal  = S.addons.ob  ? OB_PEV * ev : 0;
-  var aiTotal  = S.addons.ai  ? AI_PEV * S.credPacks * ev : 0;
+  var aiTotal  = S.addons.ai  ? AI_PEV * S.credPacks : 0;
   var crmTotal = S.crm!=="none" ? CRM_PEV * ev : 0;
 
   // Gamification: always straight ev * qty * price
@@ -577,9 +577,9 @@ function build(){
     S.addons.ob?sup(obTotal):dash(), false);
   html+=qgap();
 
-  // EdgeCapture - units = 1
+  // EdgeCapture - units = 1, total = credits × packs (NOT × events)
   html+=qrow("EdgeCapture",
-    "AI Lead Enrichment Service &middot; "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits per event":"Block of 500 credits"),
+    "AI Lead Enrichment Service &middot; "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits total":"Block of 500 credits"),
     S.addons.ai?"1":dash(),
     S.addons.ai?fmtD(aiTotal):dash(),
     S.addons.ai?sup(aiTotal):dash(), false);
@@ -762,7 +762,7 @@ function buildPrintRows(){
   var xSeatTotal = Math.round(p.seat * xSeat);
   var engTotal   = S.addons.eng ? ENG_ADDON * ev : 0;
   var obTotal    = S.addons.ob    ? OB_PEV * ev : 0;
-  var aiTotal    = S.addons.ai    ? AI_PEV * S.credPacks * ev : 0;
+  var aiTotal    = S.addons.ai    ? AI_PEV * S.credPacks : 0;
   var crmTotal   = S.crm!=="none" ? CRM_PEV * ev : 0;
   var gamiTotal  = 0;
   Object.keys(S.gami).forEach(function(id){if(S.gami[id])gamiTotal+=GAMI_P[id]*S.gamiQty[id]*ev;});
@@ -798,7 +798,7 @@ function buildPrintRows(){
   // Setup - units = 1
   rows+=pr("Setup","Event Setup & User Onboarding",S.addons.ob?1:null,S.addons.ob?"$"+fmtN(obTotal):null,S.addons.ob?obTotal:null,true);
   // EdgeCapture - units = 1, 500 credits per pack
-  rows+=pr("EdgeCapture","AI Lead Enrichment · "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits/event":"not selected"),S.addons.ai?1:null,S.addons.ai?"$"+fmtN(aiTotal):null,S.addons.ai?aiTotal:null,false);
+  rows+=pr("EdgeCapture","AI Lead Enrichment · "+(S.addons.ai?(S.credPacks*500).toLocaleString()+" credits total":"not selected"),S.addons.ai?1:null,S.addons.ai?"$"+fmtN(aiTotal):null,S.addons.ai?aiTotal:null,false);
   // Gamification - units = 1
   rows+=pr("Gamification",gDesc,gAct.length>0?1:null,gAct.length>0?"$"+fmtN(gamiTotal):null,gAct.length>0?gamiTotal:null,true);
   return rows;
